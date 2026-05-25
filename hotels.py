@@ -5,14 +5,22 @@ from schemas.hotels import Hotel, HotelPATCH
 router = APIRouter(prefix="/hotels", tags=["Отели"])
 
 hotels = [
-    {"id": 1, "title": "Moscow", "name": "sochi"},
+    {"id": 1, "title": "Москва", "name": "moscow"},
     {"id": 2, "title": "Дубай", "name": "dubai"},
+    {"id": 3, "title": "Казань", "name": "kazan"},
+    {"id": 4, "title": "Саратов", "name": "saratov"},
+    {"id": 5, "title": "Самара", "name": "samara"},
+    {"id": 6, "title": "Пермь", "name": "perm"},
+    {"id": 6, "title": "Нью-йорк", "name": "new york"},
 ]
 
 
 @router.get("")
 def get_hotels(
-    id: int | None = Query(default=None), title: str | None = Query(default=None)
+    id: int | None = Query(default=None),
+    title: str | None = Query(default=None),
+    page: int | None = Query(default=1, gt=1),
+    per_page: int | None = Query(default=3, lt=30),
 ):
     hotels_ = []
     for hotel in hotels:
@@ -22,6 +30,8 @@ def get_hotels(
             continue
         hotels_.append(hotel)
 
+    if page and per_page:
+        return hotels_[per_page * (page - 1) :][:per_page]
     return hotels_
 
 
