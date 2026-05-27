@@ -1,7 +1,7 @@
 from fastapi import Query, APIRouter
 from fastapi.params import Body
 
-from sqlalchemy import insert
+from sqlalchemy import insert, select
 
 from src.models.hotels import HotelsORM
 from src.database import async_session_maker
@@ -10,34 +10,23 @@ from src.schemas.hotels import Hotel, HotelPATCH
 
 router = APIRouter(prefix="/hotels", tags=["Отели"])
 
-hotels = [
-    {"id": 1, "title": "Москва", "name": "moscow"},
-    {"id": 2, "title": "Дубай", "name": "dubai"},
-    {"id": 3, "title": "Казань", "name": "kazan"},
-    {"id": 4, "title": "Саратов", "name": "saratov"},
-    {"id": 5, "title": "Самара", "name": "samara"},
-    {"id": 6, "title": "Пермь", "name": "perm"},
-    {"id": 6, "title": "Нью-йорк", "name": "new york"},
-]
-
 
 @router.get("")
-def get_hotels(
+async def get_hotels(
     pagination: PaginationDep,
     id: int | None = Query(default=None),
     title: str | None = Query(default=None),
 ):
-    hotels_ = []
-    for hotel in hotels:
-        if id and hotel["id"] != id:
-            continue
-        if title and hotel["title"] != title:
-            continue
-        hotels_.append(hotel)
+    async with async_session_maker() as session:
+        query = select(HotelsORM)
+        result = await session.execute(query)
 
-    if pagination.page and pagination.per_page:
-        return hotels_[pagination.per_page * (pagination.page - 1) :][:pagination.per_page]
-    return hotels_
+        hotels = result.scalars().all()
+
+        return hotels
+
+    # if pagination.page and pagination.per_page:
+        # return hotels_[pagination.per_page * (pagination.page - 1) :][:pagination.per_page]
 
 
 @router.post("")
