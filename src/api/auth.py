@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException, Response
 
+from src.api.dependencies import UserIdDep
 from src.services.auth import AuthService
 from src.database import async_session_maker
 from repositories.users import UsersRepository
@@ -35,3 +36,12 @@ async def login_user(
         access_token = AuthService().create_access_token({"user_id": user.id})
         response.set_cookie("access_token", access_token)
         return {"access_token": access_token, "token_type": "bearer"}
+
+
+@router.get("/me")
+async def get_me(
+        user_id: UserIdDep,
+):
+    async with async_session_maker() as session:
+        user = await UsersRepository(session).get_one_or_none(id=user_id)
+        return user

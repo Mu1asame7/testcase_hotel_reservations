@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta, timezone
 
 import jwt
+from fastapi import HTTPException, status
 from pwdlib import PasswordHash
 
 from src.config import settings
@@ -22,3 +23,9 @@ class AuthService:
 
     def verify_password(self, password: str, hashed_password: str) -> bool:
         return self.password_hash.verify(password, hashed_password)
+
+    def encode_token(self, token: str) -> dict:
+        try:
+            return jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
+        except jwt.exceptions.DecodeError:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate token")
