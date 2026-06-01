@@ -1,10 +1,11 @@
 from datetime import date
 from tkinter.scrolledtext import example
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, Body
 
+from src.schemas.facilities import RoomFacilityAdd
 from src.api.dependencies import DBDep
-from schemas.rooms import RoomAdd, RoomAddRequest, RoomPatch, RoomPatchRequest
+from src.schemas.rooms import RoomAdd, RoomAddRequest, RoomPatch, RoomPatchRequest
 
 router = APIRouter(prefix="/hotels", tags=["Номера"])
 
@@ -25,9 +26,12 @@ async def get_one_room(db: DBDep, hotel_id: int, room_id: int):
 
 
 @router.post("/{hotel_id}/rooms")
-async def post_room(db: DBDep, hotel_id: int, room_data: RoomAddRequest):
+async def post_room(db: DBDep, hotel_id: int, room_data: RoomAddRequest = Body()):
     _room_data = RoomAdd(hotel_id=hotel_id, **room_data.model_dump())
     room = await db.rooms.add(_room_data)
+
+    room_facilities_data = [RoomFacilityAdd(room_id=room.id, facility_id=f_id) for f_id in room_data.facility_ids]
+    await db.rooms_facilities.add_bulk(room_facilities_data)
     await db.commit()
 
     return {"status": "OK", "data": room}
