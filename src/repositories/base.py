@@ -12,6 +12,7 @@ class BaseRepository:
         self.session = session
 
     async def get_filtered(self, *filter, **filter_by):
+        print(self.mapper)
         query = (
             select(self.model)
             .filter(*filter)
