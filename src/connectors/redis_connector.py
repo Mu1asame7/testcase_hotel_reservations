@@ -8,7 +8,7 @@ class RedisManager:
         self.redis = None
 
     async def connect(self):
-        self.redis = redis.Redis(host=self.host, port=self.port, protocol=2)
+        self.redis = redis.Redis(host=self.host, port=self.port)
 
     async def set(self, key: str, value: str, expire: int = 0):
         if expire:
