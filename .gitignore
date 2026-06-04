@@ -2,3 +2,9 @@ venv
 .idea
 __pycache__
 .env
+
+# Celery beat
+celerybeat*
+celerybeat-schedule*
+*.dat
+*.dir
