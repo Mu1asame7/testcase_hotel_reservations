@@ -13,3 +13,4 @@ def upload_image(file: UploadFile):
         shutil.copyfileobj(file.file, new_file)
 
     resize_image.delay(image_path)
+    # background_tasks.add_task(resize_image, image_path)
